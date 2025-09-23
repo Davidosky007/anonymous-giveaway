@@ -48,7 +48,7 @@ describe('/api/public/enter/[id]', () => {
   it('should return 405 for non-POST methods', async () => {
     const { req, res } = createMocks({
       method: 'GET',
-      query: { id: 'giveaway-123' }
+      query: { id: '123e4567-e89b-12d3-a456-426614174000' }
     })
 
     await handler(req, res)
@@ -80,7 +80,7 @@ describe('/api/public/enter/[id]', () => {
 
     const { req, res } = createMocks({
       method: 'POST',
-      query: { id: 'nonexistent-giveaway' }
+      query: { id: '123e4567-e89b-12d3-a456-426614174000' }
     })
 
     await handler(req, res)
@@ -90,12 +90,12 @@ describe('/api/public/enter/[id]', () => {
       success: false,
       error: 'Giveaway not available'
     })
-    expect(mockGetGiveawayById).toHaveBeenCalledWith('nonexistent-giveaway')
+    expect(mockGetGiveawayById).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174000')
   })
 
   it('should return 400 when giveaway is not active', async () => {
     const inactiveGiveaway = {
-      id: 'giveaway-123',
+      id: '123e4567-e89b-12d3-a456-426614174001',
       title: 'Inactive Giveaway',
       status: 'completed'
     }
@@ -104,7 +104,7 @@ describe('/api/public/enter/[id]', () => {
 
     const { req, res } = createMocks({
       method: 'POST',
-      query: { id: 'giveaway-123' }
+      query: { id: '123e4567-e89b-12d3-a456-426614174001' }
     })
 
     await handler(req, res)
@@ -118,7 +118,7 @@ describe('/api/public/enter/[id]', () => {
 
   it('should return 400 when IP already entered', async () => {
     const activeGiveaway = {
-      id: 'giveaway-123',
+      id: '123e4567-e89b-12d3-a456-426614174002',
       title: 'Active Giveaway',
       status: 'active'
     }
@@ -128,7 +128,7 @@ describe('/api/public/enter/[id]', () => {
 
     const { req, res } = createMocks({
       method: 'POST',
-      query: { id: 'giveaway-123' }
+      query: { id: '123e4567-e89b-12d3-a456-426614174002' }
     })
 
     await handler(req, res)
@@ -138,12 +138,12 @@ describe('/api/public/enter/[id]', () => {
       success: false,
       error: 'You have already entered this giveaway'
     })
-    expect(mockCheckIPEntry).toHaveBeenCalledWith('giveaway-123', 'hashed-ip')
+    expect(mockCheckIPEntry).toHaveBeenCalledWith('123e4567-e89b-12d3-a456-426614174002', 'hashed-ip')
   })
 
   it('should successfully create entry', async () => {
     const activeGiveaway = {
-      id: 'giveaway-123',
+      id: '123e4567-e89b-12d3-a456-426614174003',
       title: 'Active Giveaway',
       status: 'active'
     }
@@ -154,7 +154,7 @@ describe('/api/public/enter/[id]', () => {
 
     const { req, res } = createMocks({
       method: 'POST',
-      query: { id: 'giveaway-123' }
+      query: { id: '123e4567-e89b-12d3-a456-426614174003' }
     })
 
     await handler(req, res)
@@ -166,7 +166,7 @@ describe('/api/public/enter/[id]', () => {
     })
     expect(mockCreateEntry).toHaveBeenCalledWith(
       'generated-id',
-      'giveaway-123', 
+      '123e4567-e89b-12d3-a456-426614174003', 
       'generated-id',
       'hashed-ip'
     )
@@ -179,7 +179,7 @@ describe('/api/public/enter/[id]', () => {
 
     const { req, res } = createMocks({
       method: 'POST',
-      query: { id: 'giveaway-123' }
+      query: { id: '123e4567-e89b-12d3-a456-426614174004' }
     })
 
     await handler(req, res)

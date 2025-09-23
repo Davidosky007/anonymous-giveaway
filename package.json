@@ -13,8 +13,13 @@
     "test:ci": "jest --ci --coverage --watchAll=false"
   },
   "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/joi": "^17.2.2",
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.3.0",
     "cookie": "^1.0.2",
+    "express-rate-limit": "^8.1.0",
+    "joi": "^18.0.1",
     "next": "15.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
