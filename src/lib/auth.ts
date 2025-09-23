@@ -2,28 +2,21 @@ import { v4 as uuidv4 } from 'uuid';
 import { dbQueries } from './db';
 import { serialize } from 'cookie';
 import crypto from 'crypto';
-import bcrypt from 'bcrypt';
 
-// Environment configuration with fallbacks
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || 
-  // Default hash for 'admin123' - should be changed in production
-  '$2b$10$rOcEaBJfaVhJF6x4N8cHpOQdNAKbX4OwGYRZbYUUYBqY6Q4xPzrB2';
-
+// Simple password configuration - no hashing
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const SESSION_DURATION = parseInt(process.env.SESSION_DURATION || '86400'); // 24 hours default
 
 export async function validatePassword(password: string): Promise<boolean> {
   try {
-    return await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+    return password === ADMIN_PASSWORD;
   } catch (error) {
     console.error('Password validation error:', error);
     return false;
   }
 }
 
-export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 10;
-  return await bcrypt.hash(password, saltRounds);
-}
+// Remove the hashPassword function since we're not using bcrypt anymore
 
 export function createSession(): string {
   const sessionId = uuidv4();

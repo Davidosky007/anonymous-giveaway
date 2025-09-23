@@ -1,14 +1,6 @@
 import { validatePassword, hashIP, createSession, validateSession, destroySession, destroySessionCookie } from '../../src/lib/auth'
 import { dbQueries } from '../../src/lib/db'
 import crypto from 'crypto'
-import bcrypt from 'bcrypt'
-
-// Mock bcrypt
-jest.mock('bcrypt', () => ({
-  compare: jest.fn(),
-}))
-
-const mockBcrypt = bcrypt as jest.Mocked<typeof bcrypt>
 
 // Mock the database queries
 jest.mock('../../src/lib/db', () => ({
@@ -36,14 +28,13 @@ jest.mock('crypto', () => ({
 
 const mockCrypto = crypto as jest.Mocked<typeof crypto>
 
-// Mock environment variables with a hashed password
+// Mock environment variables with a plain password
 const originalEnv = process.env
-const testPasswordHash = '$2b$10$abcd1234567890' // Mock hash
 beforeEach(() => {
   jest.resetModules()
   process.env = {
     ...originalEnv,
-    ADMIN_PASSWORD_HASH: testPasswordHash,
+    ADMIN_PASSWORD: 'admin123',
   }
 })
 
@@ -58,27 +49,22 @@ describe('auth utilities', () => {
 
   describe('validatePassword', () => {
     it('returns true for correct password', async () => {
-      ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
       const result = await validatePassword('admin123')
       expect(result).toBe(true)
-      expect(bcrypt.compare).toHaveBeenCalledWith('admin123', expect.any(String))
     })
 
     it('returns false for incorrect password', async () => {
-      ;(bcrypt.compare as jest.Mock).mockResolvedValue(false)
       const result = await validatePassword('wrong-password')
       expect(result).toBe(false)
-      expect(bcrypt.compare).toHaveBeenCalledWith('wrong-password', expect.any(String))
     })
 
     it('returns false for empty password', async () => {
-      ;(bcrypt.compare as jest.Mock).mockResolvedValue(false)
       const result = await validatePassword('')
       expect(result).toBe(false)
     })
 
-    it('returns false when ADMIN_PASSWORD_HASH is not set', async () => {
-      delete process.env.ADMIN_PASSWORD_HASH
+    it('returns false when ADMIN_PASSWORD is not set', async () => {
+      delete process.env.ADMIN_PASSWORD
       const result = await validatePassword('any-password')
       expect(result).toBe(false)
     })
@@ -223,9 +209,6 @@ describe('auth utilities', () => {
     })
 
     it('handles password validation and session creation flow', async () => {
-      // Mock successful bcrypt comparison
-      ;(bcrypt.compare as jest.Mock).mockResolvedValue(true)
-      
       // Validate password
       expect(await validatePassword('admin123')).toBe(true)
 

@@ -4,33 +4,101 @@ A simple web app for running anonymous giveaways. Users can enter without signin
 
 ## Getting Started
 
-You'll need Node.js (16+) and npm installed.
+### Prerequisites
+- Node.js (16 or higher) - [Download here](https://nodejs.org/)
+- npm (comes with Node.js)
+- Git (optional, for cloning)
+
+### Step-by-Step Setup
+
+1. **Get the code**
+   ```bash
+   git clone https://github.com/Davidosky007/anonymous-giveaway.git
+   cd anonymous-giveaway
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up admin access**
+   - Copy the `.env.example` file to create your local environment:
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   - Update `.env.local` with your desired admin password:
+   ```bash
+   ADMIN_PASSWORD=yourPasswordHere
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Access the app**
+   - **Public app**: `http://localhost:3000`
+   - **Admin login**: `http://localhost:3000/admin/login`
+   - Use the password you generated in step 3
+
+That's it! The database gets created automatically when you first run the app.
+
+### Quick Start (Default Setup)
+If you just want to test it quickly with default settings:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Davidosky007/anonymous-giveaway.git
 cd anonymous-giveaway
 npm install
+cp .env.example .env.local
+# Edit .env.local to set your admin password
 npm run dev
 ```
 
-That's it! The app runs on `http://localhost:3000`.
+Then visit `http://localhost:3000` and use "admin" as your password.
 
-### Admin Access
-- Admin login: `http://localhost:3000/admin/login`
-- Set up your admin password using the password hash generator:
+## Troubleshooting
 
+### "Invalid password" error when logging in
+- Make sure you've created a `.env.local` file with the correct `ADMIN_PASSWORD`
+- Check that your password in `.env.local` matches what you're typing
+- Restart the dev server: `npm run dev`
+
+### Port 3000 already in use
 ```bash
-node scripts/generate-password-hash.js yourSecurePassword123
+npm run dev -- -p 3001  # Use port 3001 instead
 ```
 
-Copy the generated hash to your `.env.local` file:
+### Database errors
+- Delete the `database/` folder and restart - it will recreate automatically
+- Make sure you have write permissions in the project directory
 
-```bash
-ADMIN_PASSWORD_HASH=$2b$10$your.generated.hash.here
-```
+### npm install fails
+- Try deleting `node_modules` and `package-lock.json`, then run `npm install` again
+- Make sure you're using Node.js 16 or higher: `node --version`
 
 ### Database
 Uses SQLite - the database file gets created automatically in `./database/giveaway.db` when you first run the app. No setup needed.
+
+## Using the App
+
+### For Users (Public)
+1. Visit `http://localhost:3000`
+2. Browse available giveaways
+3. Click "Enter Giveaway" on any active giveaway
+4. Get a unique anonymous ID as confirmation
+5. Wait for the admin to pick winners!
+
+### For Admins
+1. Login at `http://localhost:3000/admin/login`
+2. **Create giveaways**: Add title, description, set as active
+3. **View entries**: See how many people entered (anonymously)
+4. **Pick winners**: Randomly select winners from entries
+5. **Manage giveaways**: Mark as completed when done
+
+**Note**: Currently you can only create and manage giveaways. Editing/deleting existing giveaways isn't implemented yet.
 
 ## Testing
 
@@ -56,15 +124,15 @@ Coverage is pretty good for the core stuff (80-100% on most files).
 
 **Anonymous entries**: Each entry gets a UUID, but I track IPs to prevent spam. Users stay anonymous but can't flood the system.
 
-**Production-ready security**: Implemented bcrypt password hashing, rate limiting (prevents brute force attacks), input validation with Joi schemas, and comprehensive security headers including HTTPS enforcement and CORS protection.
+**Production-ready security**: Implemented rate limiting (prevents brute force attacks), input validation with Joi schemas, and comprehensive security headers including HTTPS enforcement and CORS protection.
 
-**Simple auth**: Cookie-based sessions for admin access. No fancy JWT stuff needed for a single-admin demo.
+**Simple auth**: Plain text password comparison for simplicity. Cookie-based sessions for admin access.
 
 ## Security Features
 
 This implementation includes production-ready security measures:
 
-- **Password Security**: Admin passwords are hashed using bcrypt with salt rounds
+- **Simple Password Auth**: Plain text password comparison for easy setup and debugging
 - **Rate Limiting**: API endpoints protected against brute force attacks (5 auth attempts per 15 minutes, 50 public requests per 15 minutes)
 - **Input Validation**: All API inputs validated using Joi schemas with proper error handling
 - **Security Headers**: HTTPS enforcement, CORS protection, Content Security Policy, and HSTS headers
@@ -95,7 +163,7 @@ This implementation includes production-ready security measures:
 - **Frontend**: Next.js 15, React 19, TypeScript, Tailwind
 - **Backend**: Next.js API routes
 - **Database**: SQLite with better-sqlite3
-- **Security**: bcrypt password hashing, express-rate-limit, Joi validation, security headers
+- **Security**: express-rate-limit, Joi validation, security headers
 - **Testing**: Jest + React Testing Library (81 tests, 100% pass rate)
 
 ## Project Structure
@@ -110,7 +178,6 @@ src/
 
 __tests__/         # All test files (81 tests covering APIs, components, utilities)
 database/          # SQLite files (auto-created)
-scripts/           # Utility scripts (password hash generator)
 ```
 
 ## License
