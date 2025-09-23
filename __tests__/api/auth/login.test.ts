@@ -30,7 +30,7 @@ describe('/api/auth/login', () => {
     })
   })
 
-  it('should return 401 when password is missing', async () => {
+  it('should return 400 when password is missing', async () => {
     const { req, res } = createMocks({
       method: 'POST',
       body: {}
@@ -38,15 +38,15 @@ describe('/api/auth/login', () => {
 
     await handler(req, res)
 
-    expect(res._getStatusCode()).toBe(401)
+    expect(res._getStatusCode()).toBe(400)
     expect(JSON.parse(res._getData())).toEqual({
       success: false,
-      error: 'Invalid password'
+      error: 'Password is required'
     })
   })
 
   it('should return 401 for invalid password', async () => {
-    mockAuth.validatePassword.mockReturnValue(false)
+    mockAuth.validatePassword.mockResolvedValue(false)
 
     const { req, res } = createMocks({
       method: 'POST',
@@ -64,7 +64,7 @@ describe('/api/auth/login', () => {
   })
 
   it('should return 200 and set cookie for valid password', async () => {
-    mockAuth.validatePassword.mockReturnValue(true)
+    mockAuth.validatePassword.mockResolvedValue(true)
     mockAuth.createSession.mockReturnValue('session-123')
     mockAuth.createSessionCookie.mockReturnValue('session=session-123; HttpOnly; Path=/')
 
@@ -86,7 +86,7 @@ describe('/api/auth/login', () => {
   })
 
   it('should handle errors gracefully', async () => {
-    mockAuth.validatePassword.mockReturnValue(true)
+    mockAuth.validatePassword.mockResolvedValue(true)
     mockAuth.createSession.mockImplementation(() => {
       throw new Error('Database error')
     })

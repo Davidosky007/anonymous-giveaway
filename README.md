@@ -1,40 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Anonymous Giveaway System
+
+A simple web app for running anonymous giveaways. Users can enter without signing up, and admins can pick winners randomly. Built this to explore how to handle user anonymity while still preventing spam.
 
 ## Getting Started
 
-First, run the development server:
+You'll need Node.js (16+) and npm installed.
 
 ```bash
+git clone <repository-url>
+cd anonymous-giveaway
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+That's it! The app runs on `http://localhost:3000`.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+### Admin Access
+- Admin login: `http://localhost:3000/admin/login`
+- Set up your admin password using the password hash generator:
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+```bash
+node scripts/generate-password-hash.js yourSecurePassword123
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+Copy the generated hash to your `.env.local` file:
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+ADMIN_PASSWORD_HASH=$2b$10$your.generated.hash.here
+```
 
-## Learn More
+### Database
+Uses SQLite - the database file gets created automatically in `./database/giveaway.db` when you first run the app. No setup needed.
 
-To learn more about Next.js, take a look at the following resources:
+## Testing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+```bash
+npm test                    # Run all tests
+npm test -- --coverage     # See coverage report
+npm run test:watch         # Watch mode
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+I wrote 81 tests covering the main functionality:
+- All API endpoints work correctly
+- Components render properly
+- Utility functions handle edge cases
+- Database operations don't break
 
-## Deploy on Vercel
+Coverage is pretty good for the core stuff (80-100% on most files).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Why I Built It This Way
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+**Next.js for everything**: Keeps things simple - same framework for frontend and backend. Less moving parts to worry about.
+
+**SQLite**: Fast, zero-config, and perfect for this scale. No need for a heavy database setup.
+
+**Anonymous entries**: Each entry gets a UUID, but I track IPs to prevent spam. Users stay anonymous but can't flood the system.
+
+**Production-ready security**: Implemented bcrypt password hashing, rate limiting (prevents brute force attacks), input validation with Joi schemas, and comprehensive security headers including HTTPS enforcement and CORS protection.
+
+**Simple auth**: Cookie-based sessions for admin access. No fancy JWT stuff needed for a single-admin demo.
+
+## Security Features
+
+This implementation includes production-ready security measures:
+
+- **Password Security**: Admin passwords are hashed using bcrypt with salt rounds
+- **Rate Limiting**: API endpoints protected against brute force attacks (5 auth attempts per 15 minutes, 50 public requests per 15 minutes)
+- **Input Validation**: All API inputs validated using Joi schemas with proper error handling
+- **Security Headers**: HTTPS enforcement, CORS protection, Content Security Policy, and HSTS headers
+- **IP-based Entry Control**: Prevents duplicate entries while maintaining user anonymity
+- **Session Management**: Secure cookie-based authentication with configurable expiration
+
+## list of missing items i'd implement with more time
+
+### 🎯 Core Features
+- **Email notifications** - Winner notification system and entry confirmations
+- **Edit/delete giveaways** - Admin can only create, not modify
+- **Entry requirements** - No social media follows, email collection, etc.
+- **Scheduled start/end times** - All giveaways are manual
+- **Multiple winners per giveaway** - Only supports single winner
+- **Real-time entry count updates** - Counts only update on page refresh
+- **Winner contact system** - No way to reach winners after selection
+
+### 🔧 Nice-to-Have Improvements
+- **Analytics dashboard** - Entry statistics, engagement metrics
+- **Social media sharing** - Built-in viral mechanics
+- **Mobile app** - React Native companion
+- **Multi-language support** - i18n for global giveaways
+- **Advanced admin features** - User management, audit logs, backups
+- **Giveaway templates** - Quick setup for common giveaway types
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind
+- **Backend**: Next.js API routes
+- **Database**: SQLite with better-sqlite3
+- **Security**: bcrypt password hashing, express-rate-limit, Joi validation, security headers
+- **Testing**: Jest + React Testing Library (81 tests, 100% pass rate)
+
+## Project Structure
+
+```
+src/
+├── components/     # React components
+├── lib/           # Database, auth, utilities, security middleware
+├── pages/         # Next.js pages + API routes
+├── styles/        # CSS
+└── types/         # TypeScript definitions
+
+__tests__/         # All test files (81 tests covering APIs, components, utilities)
+database/          # SQLite files (auto-created)
+scripts/           # Utility scripts (password hash generator)
+```
+
+## License
+
+Built for demo purposes. Use however you want!
